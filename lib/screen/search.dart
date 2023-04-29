@@ -63,6 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             children: [
               Container(
+                
                 height: height * 0.06,
                 width: height * 0.37,
                 decoration: BoxDecoration(
