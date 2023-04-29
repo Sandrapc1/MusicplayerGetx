@@ -1,0 +1,507 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
+import 'package:blurrycontainer/blurrycontainer.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/models/playlistmodel.dart';
+import 'package:music_player_1/screen/popsong.dart';
+import 'package:music_player_1/screen/rock.dart';
+import 'package:music_player_1/screen/trance.dart';
+import 'package:on_audio_query/on_audio_query.dart';
+import '../widget/bottam.dart';
+
+class PlayList extends StatefulWidget {
+  const PlayList({super.key});
+
+  @override
+  State<PlayList> createState() => _PlayListState();
+}
+
+class _PlayListState extends State<PlayList> {
+  var size, height, width;
+  final playlistbox = PlaylistBox.getInstance();
+  final List<PlaylistModel> playlistsongs = [];
+  late List<PlayListDb> playlistsong = playlistbox.values.toList();
+
+  @override
+  Widget build(BuildContext context) {
+    size = MediaQuery.of(context).size;
+    height = size.height;
+    width = size.width;
+    return Scaffold(
+      backgroundColor: bgcolor,
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: bkclr),
+        backgroundColor: bgcolor,
+        title: Text('PlayLists',
+            style: GoogleFonts.lato(color: bkclr, fontSize: 30)),
+      ),
+      endDrawer: drawer(context),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        //crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          
+      Padding(
+        padding:  EdgeInsets.only(left: height*0.35,bottom: height*0.08),
+        child: FloatingActionButton(
+        
+                backgroundColor: favfill,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Create PlayList'),
+                        content: TextField(
+                          onChanged: (value) {},
+                          decoration:
+                              const InputDecoration(hintText: 'Enter Folder Name'),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('No',
+                                  style: TextStyle(color: Colors.red))),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
+                                'Yes',
+                                style: TextStyle(color: Colors.green),
+                              ))
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Icon(
+                  Icons.add,
+                  color: bkclr,
+                  size: 45,
+                ),
+            
+        // body: SingleChildScrollView(
+        //   child: Padding(
+        //     padding: const EdgeInsets.all(28),
+        //     child:
+        //         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        //       const SizedBox(height: 40),
+           
+        
+              //       SizedBox(height: height * 0.040),
+              //       Stack(children: [
+              //         InkWell(
+              //           onTap: () {
+              //             Navigator.of(context)
+              //                 .push(MaterialPageRoute(builder: (context) {
+              //               return const RockSongs();
+              //             }));
+              //           },
+              //           child: Container(
+              //             height: height * 0.25,
+              //             width: height * 0.40,
+              //             decoration: const BoxDecoration(
+              //                 borderRadius: BorderRadius.only(
+              //                     bottomLeft: Radius.circular(20),
+              //                     bottomRight: Radius.circular(20)),
+              //                 image: DecorationImage(
+              //                   image: AssetImage('assets/images/playlist2.jpg'),
+              //                   fit: BoxFit.cover,
+              //                 )),
+              //           ),
+              //         ),
+              //         Positioned(
+              //           bottom: 0,
+              //           child: BlurryContainer(
+              //             blur: 10,
+              //             borderRadius: const BorderRadius.only(
+              //                 bottomLeft: Radius.circular(20),
+              //                 bottomRight: Radius.circular(20)),
+              //             padding: const EdgeInsets.all(0),
+              //             height: height * 0.06,
+              //             width: height * 0.40,
+              //             child: Column(
+              //               children: [
+              //                 Text(
+              //                   'Rock Songs',
+              //                   style: GoogleFonts.lato(
+              //                       color: bkclr,
+              //                       fontSize: 17,
+              //                       fontWeight: FontWeight.bold),
+              //                 ),
+              //                 Text(
+              //                   '3 Songs',
+              //                   style: GoogleFonts.lato(
+              //                     color: bkclr,
+              //                     fontSize: 9,
+              //                   ),
+              //                 )
+              //               ],
+              //             ),
+              //           ),
+              //         ),
+              //         Row(
+              //           mainAxisAlignment: MainAxisAlignment.end,
+              //           children: [
+              //             PopupMenuButton(
+              //               color: bkclr,
+              //               onSelected: (value) {
+              //                 showModalBottomSheet(
+              //                   elevation: 0,
+              //                   isDismissible: true,
+              //                   context: context,
+              //                   builder: (context) {
+              //                     return SizedBox(
+              //                       height: height * 0.15,
+              //                       child: SingleChildScrollView(
+              //                         child: Column(
+              //                           children: [
+              //                             SizedBox(height: height * 0.01),
+              //                             const Text(
+              //                               ' Rename',
+              //                               style: TextStyle(
+              //                                   fontWeight: FontWeight.bold,
+              //                                   fontSize: 20),
+              //                             ),
+              //                             SizedBox(height: height * 0.02),
+              //                             ElevatedButton(
+              //                                 onPressed: () {},
+              //                                 child: const Text('Create Playlist'))
+              //                           ],
+              //                         ),
+              //                       ),
+              //                     );
+              //                   },
+              //                 );
+              //               },
+              //               itemBuilder: (context) => [
+              //                 const PopupMenuItem(
+              //                   value: 1,
+              //                   child: Text('Edit'),
+              //                 ),
+              //                 const PopupMenuItem(
+              //                   value: 2,
+              //                   child: Text('Remove',
+              //                       style: TextStyle(
+              //                         color: delete,
+              //                       )),
+              //                 ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //       ]),
+              //       SizedBox(height: height * 0.040),
+              //       Stack(children: [
+              //         InkWell(
+              //           onTap: () {
+              //             Navigator.push(
+              //                 context,
+              //                 MaterialPageRoute(
+              //                   builder: (context) => const PopSongs(),
+              //                 ));
+              //           },
+              //           child: Container(
+              //             height: height * 0.25,
+              //             width: height * 0.40,
+              //             decoration: const BoxDecoration(
+              //                 borderRadius: BorderRadius.only(
+              //                     bottomLeft: Radius.circular(20),
+              //                     bottomRight: Radius.circular(20)),
+              //                 image: DecorationImage(
+              //                   image: AssetImage('assets/images/playlist3.jpg'),
+              //                   fit: BoxFit.cover,
+              //                 )),
+              //           ),
+              //         ),
+              //         Positioned(
+              //           bottom: 0,
+              //           child: BlurryContainer(
+              //             blur: 10,
+              //             borderRadius: const BorderRadius.only(
+              //                 bottomLeft: Radius.circular(20),
+              //                 bottomRight: Radius.circular(20)),
+              //             padding: const EdgeInsets.all(0),
+              //             height: height * 0.06,
+              //             width: height * 0.40,
+              //             child: Column(
+              //               children: [
+              //                 Text(
+              //                   'Pop Songs',
+              //                   style: GoogleFonts.lato(
+              //                       color: bkclr,
+              //                       fontSize: 17,
+              //                       fontWeight: FontWeight.bold),
+              //                 ),
+              //                 Text(
+              //                   '3 Songs',
+              //                   style: GoogleFonts.lato(
+              //                     color: bkclr,
+              //                     fontSize: 9,
+              //                   ),
+              //                 )
+              //               ],
+              //             ),
+              //           ),
+              //         ),
+              //         Row(
+              //           mainAxisAlignment: MainAxisAlignment.end,
+              //           children: [
+              //             PopupMenuButton(
+              //               color: bkclr,
+              //               onSelected: (value) {
+              //                 showModalBottomSheet(
+              //                   elevation: 0,
+              //                   isDismissible: true,
+              //                   context: context,
+              //                   builder: (context) {
+              //                     return SizedBox(
+              //                       height: height * 0.15,
+              //                       child: SingleChildScrollView(
+              //                         child: Column(
+              //                           children: [
+              //                             SizedBox(height: height * 0.01),
+              //                             const Text(
+              //                               ' Rename',
+              //                               style: TextStyle(
+              //                                   fontWeight: FontWeight.bold,
+              //                                   fontSize: 20),
+              //                             ),
+              //                             SizedBox(height: height * 0.02),
+              //                             ElevatedButton(
+              //                                 onPressed: () {},
+              //                                 child: const Text('Create Playlist'))
+              //                           ],
+              //                         ),
+              //                       ),
+              //                     );
+              //                   },
+              //                 );
+              //               },
+              //               itemBuilder: (context) => [
+              //                 const PopupMenuItem(
+              //                   value: 1,
+              //                   child: Text('Edit'),
+              //                   // Text(''),
+              //                 ),
+              //                 const PopupMenuItem(
+              //                   value: 2,
+              //                   child: Text('Remove',
+              //                       style: TextStyle(
+              //                         color: delete,
+              //                       )),
+              //                 ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //       ]),
+              //     ]),
+              //   ),
+              // ),
+              // floatingActionButton: FloatingActionButton(
+              //   backgroundColor: favfill,
+              //   onPressed: () {
+              //     showDialog(
+              //       context: context,
+              //       builder: (context) {
+              //         return AlertDialog(
+              //           title: const Text('Create PlayList'),
+              //           content: TextField(
+              //             onChanged: (value) {},
+              //             decoration:
+              //                 const InputDecoration(hintText: 'Enter Folder Name'),
+              //           ),
+              //           actions: [
+              //             TextButton(
+              //                 onPressed: () {
+              //                   Navigator.pop(context);
+              //                 },
+              //                 child: const Text('No',
+              //                     style: TextStyle(color: Colors.red))),
+              //             TextButton(
+              //                 onPressed: () {
+              //                   Navigator.pop(context);
+              //                 },
+              //                 child: const Text(
+              //                   'Yes',
+              //                   style: TextStyle(color: Colors.green),
+              //                 ))
+              //           ],
+              //         );
+              //       },
+              //     );
+              //   },
+              //   child: const Icon(
+              //     Icons.add,
+              //     color: bkclr,
+              //     size: 45,
+              //   ),
+          //       ]),
+          //     ),
+          //   ),
+          // );
+          ),
+      )]
+      )
+      
+    );
+        
+  }
+
+  addPlaylist(String? title,String? subtitle,int? index) {
+    Stack(children: [
+      InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PopSongs(),
+              ));
+        },
+        child: Container(
+          height: height * 0.25,
+          width: height * 0.40,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20)),
+              image: DecorationImage(
+                image: AssetImage('assets/images/playlist3.jpg'),
+                fit: BoxFit.cover,
+              )),
+        ),
+      ),
+      Positioned(
+        bottom: 0,
+        child: BlurryContainer(
+          blur: 10,
+          borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
+          padding: const EdgeInsets.all(0),
+          height: height * 0.06,
+          width: height * 0.40,
+          child: Column(
+            children: [
+              Text(
+                title!,
+                style: GoogleFonts.lato(
+                    color: bkclr, fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                subtitle!,
+                style: GoogleFonts.lato(
+                  color: bkclr,
+                  fontSize: 9,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          PopupMenuButton(
+            color: bkclr,
+            onSelected: (value) {
+              showModalBottomSheet(
+                elevation: 0,
+                isDismissible: true,
+                context: context,
+                builder: (context) {
+                  return SizedBox(
+                    height: height * 0.15,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(height: height * 0.01),
+                          const Text(
+                            ' Rename',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          SizedBox(height: height * 0.02),
+                          ElevatedButton(
+                              onPressed: () {},
+                              child: const Text('Create Playlist'))
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 1,
+                child: Text('Edit'),
+                // Text(''),
+              ),
+              const PopupMenuItem(
+                value: 2,
+                child: Text('Remove',
+                    style: TextStyle(
+                      color: delete,
+                    )),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ]);
+  }
+}
+
+
+
+
+
+
+ // showModalBottomSheet(
+                  //   elevation: 0,
+                  //   isDismissible: true,
+                  //   context: context,
+                  //   builder: (context) {
+                  //     return SizedBox(
+                  //       height: height * 0.15,
+                  //       child: Column(
+                  //         children: [
+                  //           SizedBox(height: height * 0.01),
+                  //           const Text(
+                  //             ' Rename',
+                  //             style: TextStyle(
+                  //               fontWeight: FontWeight.bold,
+                  //               fontSize: 20,
+                  //             ),
+                  //           ),
+                  //           SizedBox(height: height * 0.02),
+                  //           TextField(
+                  //             controller:editcontroller ,
+                  //             onChanged: (value) {},
+                  //             decoration: const InputDecoration(
+                  //                 hintText: 'Enter new playlist name'),
+                  //           ),
+                  //           ElevatedButton(
+                  //             onPressed: () {
+                  //               editeplaylist(index, editcontroller.text);
+                                
+                  //               Navigator.pop(context);
+                  //             },
+                  //             child: const Text(' rename'),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     );
+                  //   },
+                  // );
+
+
+      
