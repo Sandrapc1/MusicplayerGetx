@@ -6,10 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/colors/colors.dart';
 import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/screen/home.dart';
+import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/screen/playscreen.dart';
 import 'package:music_player_1/screen/splashscreen.dart';
 import 'package:music_player_1/widget/bottam.dart';
+import 'package:music_player_1/widget/switch.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+
+import '../widget/utilities.dart';
 
 
 class SearchScreen extends StatefulWidget {
@@ -62,8 +66,7 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.all(15),
           child: Column(
             children: [
-              Container(
-                
+              Container( 
                 height: height * 0.06,
                 width: height * 0.37,
                 decoration: BoxDecoration(
@@ -96,12 +99,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-               SizedBox(height: height*0.20),
-              (another.isEmpty)?const Center(
-              child: Text('Song not found',style: TextStyle(color: bkclr),),
+               SizedBox(height: height*0.05),
+              (another.isEmpty)?Padding(
+                padding:  EdgeInsets.only(top: height*0.3),
+                child: const Center(
+                child: Text('Song not found',style: TextStyle(color: bkclr),),
+                ),
               ):SizedBox(
                 height: height / 1.38,
                 child: ListView.separated(
+                  padding: EdgeInsets.only(bottom: height*0.03),
                     physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) => songList(
                         another[index].songname!,
@@ -131,11 +138,9 @@ class _SearchScreenState extends State<SearchScreen> {
             headPhoneStrategy: HeadPhoneStrategy.pauseOnUnplugPlayOnPlug,
             showNotification: true,
           );
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlayScreen(),
-              ));
+          showBottomSheet(
+            backgroundColor: bgcolor,
+            context: context, builder: (context) =>  const MiniPlayer( ),);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -155,7 +160,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   type: ArtworkType.AUDIO,
                   id: id,
                   nullArtworkWidget: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/circular.jpg'),
+                    backgroundImage: AssetImage('assets/images/null.jpg'),
                     radius: 24,
                   ),
                 ),
@@ -192,35 +197,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
+              SwitchCase(id: id),
               PopupMenuButton(
                 color: bkclr,
                 onSelected: (value) {
-                  showModalBottomSheet(
-                    elevation: 0,
-                    isDismissible: true,
-                    context: context,
-                    builder: (context) {
-                      return SizedBox(
-                        height: height * 0.15,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              SizedBox(height: height * 0.01),
-                              const Text(
-                                ' Enter playlist name',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20),
-                              ),
-                              SizedBox(height: height * 0.02),
-                              ElevatedButton(
-                                  onPressed: () {},
-                                  child: const Text('Create Playlist'))
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
+                  playlistBottomSheet(index,context,createcontroller);
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(

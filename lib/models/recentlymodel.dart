@@ -3,18 +3,18 @@ part 'recentlymodel.g.dart';
 
 
 @HiveType(typeId:3)
-class RecentlySong{
+class RecentlyPlayedSongs{
   @HiveField(0)
   String? songname;
   @HiveField(1)
   String? artist;
   @HiveField(2)
-  String? duration;
+  int ? duration;
   @HiveField(3)
   String? songurl;
   @HiveField(4)
   int? id;
-  RecentlySong({
+  RecentlyPlayedSongs({
     required this.songname,
     required this.artist,
     required this.duration,
@@ -24,8 +24,8 @@ class RecentlySong{
 
 }
 class RecentlyBox {
-  static Box<RecentlySong>? _box;
-  static Box<RecentlySong>getInstance(){
+  static Box<RecentlyPlayedSongs>? _box;
+  static Box<RecentlyPlayedSongs>getInstance(){
     return _box ??=Hive.box('Recentlyname');
   }
   

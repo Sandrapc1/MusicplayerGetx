@@ -55,24 +55,23 @@ class _PlayListState extends State<PlayList> {
                             style: TextStyle(color: Colors.red))),
                     TextButton(
                         onPressed: () {
-                          if (textcontroller.text.isEmpty||
-                          textcontroller.text==null) {
-                          Navigator.pop(context);
-                         const snackBar =SnackBar(content: Text('Name is Empty'),
-                           dismissDirection: DismissDirection.down,
-                           behavior: SnackBarBehavior.floating,
-                           elevation: 30,
-                           duration: Duration(seconds: 2),
-                           );
-                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          }else{
+                          if (textcontroller.text.isEmpty ||
+                              textcontroller.text == null) {
+                            Navigator.pop(context);
+                            const snackBar = SnackBar(
+                              content: Text('Name is Empty'),
+                              dismissDirection: DismissDirection.down,
+                              behavior: SnackBarBehavior.floating,
+                              elevation: 30,
+                              duration: Duration(seconds: 2),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          } else {
                             createplaylist(textcontroller.text, context);
                             textcontroller.clear();
-                          Navigator.pop(context);
-
+                            Navigator.pop(context);
                           }
-                           
-                          
                         },
                         child: const Text(
                           'Create',
@@ -111,7 +110,9 @@ class _PlayListState extends State<PlayList> {
                   builder: (context, playlistsongs, child) {
                     List<PlayListDb> playlistsongdb =
                         playlistsongs.values.toList();
-                    return ListView.separated(
+                      return   playlistsongs.isNotEmpty?
+
+                         ListView.separated(
                         // padding: EdgeInsets.only(bottom: height*0.07),
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
@@ -126,7 +127,12 @@ class _PlayListState extends State<PlayList> {
                         separatorBuilder: (context, index) {
                           return const SizedBox();
                         },
-                        itemCount: playlistsongdb.length);
+                        itemCount: playlistsongdb.length): Padding(
+                          padding:  EdgeInsets.only(top: height*0.3),
+                          child: const Center(
+                            
+                            child: Text('Empty playlist',style: TextStyle(color: bkclr),),),
+                        );
                   },
                 )
               ]),
@@ -141,7 +147,8 @@ class _PlayListState extends State<PlayList> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PopSongs(songindex:index , playlistname: title),
+                builder: (context) =>
+                    PopSongs(songindex: index, playlistname: title),
               ),
             );
           },
@@ -221,19 +228,15 @@ class _PlayListState extends State<PlayList> {
                             )),
                         TextButton(
                             onPressed: () {
-                              if ((editcontroller.text.isEmpty||
-                              editcontroller.text==null)) {
+                              if ((editcontroller.text.isEmpty ||
+                                  editcontroller.text == null)) {
                                 Navigator.pop(context);
                                 editcontroller.clear();
-
-                              }else{
-                               editeplaylist(index, editcontroller.text);
-                               Navigator.pop(context);
-                               editcontroller.clear();
-
+                              } else {
+                                editeplaylist(index, editcontroller.text);
+                                Navigator.pop(context);
+                                editcontroller.clear();
                               }
-
-                              
                             },
                             child: const Text(
                               'Save',
@@ -243,24 +246,22 @@ class _PlayListState extends State<PlayList> {
                     ),
                   );
                 }
+                if (value == 2) {
+                  newMethod(context, index);
+                  // Navigator.pop(context);
+                }
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: 1,
                   child: Text('Edit'),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 2,
-                  child: TextButton(
-                    onPressed: () {
-                      deleteplaylist(index);
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Remove',
-                      style: TextStyle(
-                        color: delete,
-                      ),
+                  child:  Text(
+                    'Remove',
+                    style: TextStyle(
+                      color: delete,
                     ),
                   ),
                 ),
@@ -270,5 +271,44 @@ class _PlayListState extends State<PlayList> {
         ),
       ],
     );
+  }
+
+  Future<dynamic> newMethod(BuildContext context, index) {
+    return Future.delayed(
+        const Duration(seconds: 0),
+        () => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  
+                  // titlePadding: EdgeInsets.only(left: height*0.1),
+                  
+                  title: Column(
+                    children: const [
+                       Text('Delete playlist'),
+                    ],
+                  ),
+                  
+                  content: Padding(
+                    padding:  EdgeInsets.only(left: height*0.02),
+                    child: const Text('Are you sure you want to delete?'),
+                  ),
+                  
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('No')),
+                    TextButton(
+                        onPressed: () {
+                          deleteplaylist(index);
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Yes',style: TextStyle(color: delete),))
+                  ],
+                );
+              },
+            ));
   }
 }

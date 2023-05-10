@@ -7,10 +7,20 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:music_player_1/colors/colors.dart';
 import 'package:music_player_1/models/favouritesmodel.dart';
+import 'package:music_player_1/models/mostplayedmodel.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
+import 'package:music_player_1/models/recentlymodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
 
 import '../screen/home.dart';
+
+
+
+////.....Favourites function.....////
+late Box<Favourites> favouritesdb;
+openfavouritesdb() async {
+  favouritesdb = await Hive.openBox<Favourites>('favourites');
+}
 
 addFavourites(int id,BuildContext context) async {
   List<Songs> dbSongs = songsbox.values.toList();
@@ -65,7 +75,7 @@ bool checkFavourite(int? songId, BuildContext) {
   return isPresent;
 }
 
-Future<void> removeFav(int songId) async {
+Future<void> removeFav(int songId,BuildContext context) async {
   final favbox = Favouritesbox.getInstance();
   List<Favourites> favouritesongs = favbox.values.toList();
   int currentindex =
@@ -73,17 +83,64 @@ Future<void> removeFav(int songId) async {
   if (currentindex >= 0) {
     await favouritesdb.deleteAt(currentindex);
   }
+  ScaffoldMessenger.of(context).clearSnackBars();
+     const snackBar= SnackBar(content: Text('Remove from Favourite'),
+            dismissDirection: DismissDirection.down,
+            behavior: SnackBarBehavior.floating,
+            elevation: 30,
+            duration: Duration(seconds: 1),
+            backgroundColor: delete,);
+ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
 }
 
 deletefav(int index) async {
   await favouritesdb.deleteAt(favouritesdb.length - index - 1);
+  
 }
 
-late Box<Favourites> favouritesdb;
-openfavouritesdb() async {
-  favouritesdb = await Hive.openBox<Favourites>('favourites');
+
+///...recently function....///
+late Box<RecentlyPlayedSongs>recentlyplayedopenbox;
+openrecentlyplayed()async{
+recentlyplayedopenbox=await Hive.openBox('Recentlyname');
 }
 
+addrecentlyplayed(RecentlyPlayedSongs song){
+  List<RecentlyPlayedSongs>list=recentlyplayedopenbox.values.toList();
+  bool notThere=list.where((element) => element.songname==song.songname).isEmpty;
+  if(notThere){
+    recentlyplayedopenbox.add(song);
+  }else{
+    int index=list.indexWhere((element) => element.songname==song.songname);
+    recentlyplayedopenbox.deleteAt(index);
+    recentlyplayedopenbox.add(song);
+  }
+}
+
+///.....mostlyplayed funaction....///
+late Box<MostlyPlayedSongs>mostlyplayedboxopen;
+openmostlyBox()async{
+  mostlyplayedboxopen=await Hive.openBox<MostlyPlayedSongs>('MostlyPlayedDb');
+}
+
+addPlayedSongsCount(MostlyPlayedSongs song,int index){
+final box=MostlyPlayedBox.getInstance();
+List<MostlyPlayedSongs>mostlist=box.values.toList();
+bool notThere=mostlist.where((element) => element.songname==song.songname).isEmpty;
+if (notThere) {
+  box.add(song);
+}else{
+  int index=mostlist.indexWhere((element) => element.songname==song.songname);
+  box.deleteAt(index);
+  box.put(index,song);
+}
+int count=song.count!;
+song.count=count+1;
+}
+
+
+//..playlist function..//
 late Box<PlayListDb> playlistdb;
 openplaylistDb() async {
   playlistdb = await Hive.openBox<PlayListDb>('playlist');
@@ -92,6 +149,7 @@ openplaylistDb() async {
 createplaylist(String name, BuildContext context) async {
   final playbox = PlaylistBox.getInstance();
   List<Songs> songsplaylist = [];
+  
 
   List<PlayListDb> list = playbox.values.toList();
   bool isnotpresent =
@@ -113,6 +171,14 @@ createplaylist(String name, BuildContext context) async {
 deleteplaylist(int index)  {
   final playsbox = PlaylistBox.getInstance();
   playsbox.deleteAt(index);
+  
+//  const snackBar= SnackBar(content: Text('Delete playlist'),
+//             dismissDirection: DismissDirection.down,
+//             behavior: SnackBarBehavior.floating,
+//             elevation: 30,
+//             duration: Duration(seconds: 1),
+//             backgroundColor: delete,);
+// ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
 editeplaylist(int index, String name) async {
@@ -125,3 +191,5 @@ editeplaylist(int index, String name) async {
           playlistname: name,
           playlistsongs: playlistsong[index].playlistsongs));
 }
+
+

@@ -8,9 +8,14 @@ import 'package:music_player_1/models/dbfunctions.dart';
 import 'package:music_player_1/models/favouritesmodel.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
+import 'package:music_player_1/screen/home.dart';
+import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/screen/playscreen.dart';
+// import 'package:music_player_1/screen/splashscreen.dart';
 import 'package:music_player_1/widget/bottam.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+
+bool _isPlaying = false;
 
 class FavoutitsPage extends StatefulWidget {
   // ignore: use_key_in_widget_constructors
@@ -19,8 +24,9 @@ class FavoutitsPage extends StatefulWidget {
   @override
   State<FavoutitsPage> createState() => _FavoutitsPageState();
 }
-final Songbox=SongBox.getInstance();
-final _audioPlayer = AssetsAudioPlayer.withId('0');
+
+final Songbox = SongBox.getInstance();
+// final _audioPlayer = AssetsAudioPlayer.withId('0');
 
 class _FavoutitsPageState extends State<FavoutitsPage> {
   late double height, width;
@@ -31,9 +37,8 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
   bool favorites = true;
   final playlistbox = PlaylistBox.getInstance();
 
-    late List<PlayListDb> playlistsong = playlistbox.values.toList();
-  final TextEditingController createcontroller=TextEditingController();
-
+  late List<PlayListDb> playlistsong = playlistbox.values.toList();
+  final TextEditingController createcontroller = TextEditingController();
 
   @override
   void initState() {
@@ -52,6 +57,13 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
 
   @override
   Widget build(BuildContext context) {
+    //  if(_isPlaying){
+    //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //     showBottomSheet(
+    //       backgroundColor:bgcolor,
+    //       context: context, builder: (context) => const MiniPlayer(),);
+    //   });
+    // }
     final size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -137,6 +149,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 24,
+                                  
                                 ),
                               ),
                             ],
@@ -149,7 +162,21 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                       right: height * 0.025,
                       child: FloatingActionButton(
                         backgroundColor: backcolor,
-                        onPressed: () {},
+                        onPressed: () {
+                          audioPlayer.open(
+                            Playlist(audios: favconveraudio, startIndex: 0),
+                            showNotification: true,
+                          );
+                          audioPlayer.play();
+                          setState(() {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PlayScreen(),
+                                ));
+                            _isPlaying = !_isPlaying;
+                          });
+                        },
                         child: Icon(
                           Icons.play_arrow_rounded,
                           color: Colors.white.withOpacity(0.8),
@@ -159,41 +186,42 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  // height: height /1.6,
 
-                  child: ValueListenableBuilder(
-                      valueListenable: favbox.listenable(),
-                      builder: (context, fav, child) {
-                        List<Favourites> favourite1 =
-                            fav.values.toList().reversed.toList();
-                        return favourite1.isNotEmpty
-                            ? ListView.separated(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) => songList(
-                                    favourite1[index].id!,
-                                    favourite1[index].songname!,
-                                    favourite1[index].artist!,
-                                    index),
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemCount: favourite1.length)
-                            : SizedBox(
-                                height: height / 1.6,
-                                child: const Center(
-                                  child: Text(
-                                    'No songs found',
-                                    style: TextStyle(color: bkclr),
-                                  ),
+                // height: height /1.6,
+
+                ValueListenableBuilder(
+                    valueListenable: favbox.listenable(),
+                    builder: (context, fav, child) {
+                      List<Favourites> favourite1 =
+                          fav.values.toList().reversed.toList();
+                      return favourite1.isNotEmpty
+                          ? ListView.separated(
+                              padding: EdgeInsets.only(bottom: width * .3),
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) => songList(
+                                  favourite1[index].id!,
+                                  favourite1[index].songname!,
+                                  favourite1[index].artist!,
+                                  index),
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 10),
+                              itemCount: favourite1.length)
+                          : SizedBox(
+                              height: height / 1.6,
+                              child: const Center(
+                                child: Text(
+                                  'No songs found',
+                                  style: TextStyle(color: bkclr),
                                 ),
-                              );
-                      }),
-                ),
+                              ),
+                            );
+                    }),
               ],
             ),
           ),
         ),
+        bottomSheet: Container(color: bgcolor, child: const MiniPlayer()),
       ),
     );
   }
@@ -203,15 +231,15 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
       padding: EdgeInsets.only(left: height * 0.01, right: height * 0.01),
       child: InkWell(
         onTap: () {
-          _audioPlayer.open(Playlist(audios: favconveraudio, startIndex: index),
+          audioPlayer.open(Playlist(audios: favconveraudio, startIndex: index),
               showNotification: true,
               headPhoneStrategy: HeadPhoneStrategy.pauseOnUnplug,
               loopMode: LoopMode.playlist);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlayScreen(),
-              ));
+          showBottomSheet(
+            backgroundColor: bgcolor,
+            context: context,
+            builder: (context) => const MiniPlayer(),
+          );
         },
         child: Container(
           decoration: BoxDecoration(
@@ -221,76 +249,73 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                   //  const Color.fromARGB(255, 155, 151, 152),
                   )),
           height: height * 0.09,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: QueryArtworkWidget(id: id,
-                   type: ArtworkType.AUDIO,
-                   nullArtworkWidget: const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/headphone.jpg'
-                    ),
-                    radius: 24,
-                   )
-                   )),
-              SizedBox(
-                width: height * 0.01,
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.lato(
-                          color: Colors.white,
-                          fontSize: 15,
-                        )),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      artist,
+          child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Padding(
+                padding: const EdgeInsets.all(5),
+                child: QueryArtworkWidget(
+                    id: id,
+                    type: ArtworkType.AUDIO,
+                    nullArtworkWidget: const CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/null.jpg'),
+                      radius: 24,
+                    ))),
+            SizedBox(
+              width: height * 0.01,
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.lato(
                         color: Colors.white,
-                        fontSize: 12,
-                      ),
+                        fontSize: 15,
+                      )),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    artist,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.lato(
+                      color: Colors.white,
+                      fontSize: 12,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(width: height * 0.02),
-              IconButton(
-                icon: Icon(
-                  Icons.favorite,
-                  color: Colors.red.withOpacity(0.8),
-                ),
-                onPressed: () {
-                  // removed context
-                  deletefav(index);
+            ),
+            SizedBox(width: height * 0.02),
+            IconButton(
+              icon: Icon(
+                Icons.favorite,
+                color: Colors.red.withOpacity(0.8),
+              ),
+              onPressed: () {
+                // removed context
+                deletefav(index);
 
-                  Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const FavoutitsPage(),
-                      ));
-                     const snackBar=SnackBar(
-                      backgroundColor: delete,
-                      content: Text('Removed From Favourite'),
-                      dismissDirection: DismissDirection.down,
-                      behavior: SnackBarBehavior.floating,
-                      elevation: 20,
-                      duration: Duration(seconds: 1),);
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                },
-              ),
-              // SizedBox(width: height * 0.03),
-               PopupMenuButton(
+                Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const FavoutitsPage(),
+                    ));
+                const snackBar = SnackBar(
+                  backgroundColor: delete,
+                  content: Text('Removed From Favourite'),
+                  dismissDirection: DismissDirection.down,
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 20,
+                  duration: Duration(seconds: 1),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              },
+            ),
+            // SizedBox(width: height * 0.03),
+            PopupMenuButton(
               color: bkclr,
               onSelected: (value) {
                 showModalBottomSheet(
@@ -327,7 +352,8 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                             onPressed: () {
                                               if (createcontroller
                                                       .text.isEmpty ||
-                                                  createcontroller.text ==null) {
+                                                  createcontroller.text ==
+                                                      null) {
                                                 createcontroller.clear();
                                                 Navigator.pop(context);
                                                 const snackBar = SnackBar(
@@ -348,7 +374,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                                 createplaylist(
                                                     createcontroller.text,
                                                     context);
-                                                  Navigator.pop(context);
+                                                Navigator.pop(context);
                                               }
                                             },
                                             child: const Text(
@@ -388,7 +414,9 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                 itemBuilder: (context, index) => playlists(
                                     playlistsongdb[index].playlistname!,
                                     playlistsongs,
-                                    index,index,playlistsongdb),
+                                    index,
+                                    index,
+                                    playlistsongdb),
                                 separatorBuilder: (context, index) =>
                                     const SizedBox(
                                   height: 10,
@@ -419,63 +447,65 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
     );
   }
 
-  Widget playlists(String title, Box<PlayListDb> playlistsongs, index,songindex,playlistsongdb) {
+  Widget playlists(String title, Box<PlayListDb> playlistsongs, index,
+      songindex, playlistsongdb) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-           onTap: () {
-              PlayListDb? playsongs = playlistsongs.getAt(index);
-              List<Songs>playsongdb=playsongs!.playlistsongs!;
-              List<Favourites>songdb=favbox.values.toList();
-              bool isThere=playsongdb.any((element) => element.id==songdb[songindex].id);
-              if (!isThere) {
-                playsongdb.add(
-                  Songs(
-                    songname: songdb[songindex].songname,
-                     artist: songdb[songindex].artist, 
-                     duration: songdb[songindex].duration, 
-                     songurl:songdb[songindex].songurl, 
-                     id: songdb[songindex].id)
-                     );
-              }
-              playlistsongs.putAt(index, PlayListDb(
-                playlistname: playlistsongdb[index].playlistname,
-                 playlistsongs: playsongdb)
-                 );
-                 Navigator.pop(context);
-                 const snackbar=SnackBar(
-                  backgroundColor: bkclr,
-                  content: Text('Song Added',style: TextStyle(color: Colors.black),),
-                  dismissDirection: DismissDirection.down,
-                  behavior: SnackBarBehavior.floating,
-                  elevation: 30,
-                  duration: Duration(seconds: 1),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackbar);
-            },
-     child:  Row(
-        children: [
-             Container(
-              height: height * 0.07,
-              width: height * 0.08,
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/spotify.jpg'),
-                  fit: BoxFit.cover,
-                ),
-                border: Border.all(
-                  color: Colors.black,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(8),
+        padding: const EdgeInsets.all(8.0),
+        child: GestureDetector(
+          onTap: () {
+            PlayListDb? playsongs = playlistsongs.getAt(index);
+            List<Songs> playsongdb = playsongs!.playlistsongs!;
+            List<Favourites> songdb = favbox.values.toList();
+            bool isThere =
+                playsongdb.any((element) => element.id == songdb[songindex].id);
+            if (!isThere) {
+              playsongdb.add(Songs(
+                  songname: songdb[songindex].songname,
+                  artist: songdb[songindex].artist,
+                  duration: songdb[songindex].duration,
+                  songurl: songdb[songindex].songurl,
+                  id: songdb[songindex].id));
+            }
+            playlistsongs.putAt(
+                index,
+                PlayListDb(
+                    playlistname: playlistsongdb[index].playlistname,
+                    playlistsongs: playsongdb));
+            Navigator.pop(context);
+            const snackbar = SnackBar(
+              backgroundColor: bkclr,
+              content: Text(
+                'Song Added',
+                style: TextStyle(color: Colors.black),
               ),
-            ),
-          
-          SizedBox(width: height * 0.04),
-          Text(title)
-        ],
-      ),
-      )
-    );
+              dismissDirection: DismissDirection.down,
+              behavior: SnackBarBehavior.floating,
+              elevation: 30,
+              duration: Duration(seconds: 1),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackbar);
+          },
+          child: Row(
+            children: [
+              Container(
+                height: height * 0.07,
+                width: height * 0.08,
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/spotify.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              SizedBox(width: height * 0.04),
+              Text(title)
+            ],
+          ),
+        ));
   }
 }

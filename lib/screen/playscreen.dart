@@ -3,15 +3,19 @@
 
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
 import 'package:music_player_1/models/dbfunctions.dart';
 import 'package:music_player_1/models/songmodel.dart';
+import 'package:music_player_1/screen/home.dart';
 // import 'package:music_player_1/screen/splashscreen.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:text_scroll/text_scroll.dart';
+
+import '../widget/utilities.dart';
 
 // ignore: must_be_immutable
 class PlayScreen extends StatefulWidget {
@@ -71,9 +75,9 @@ class _PlayScreenState extends State<PlayScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color.fromARGB(255, 64, 112, 135),
-                  Color(0xFF14052E),
+                  // Color.fromARGB(255, 64, 112, 135),
                   Color(0xFF643D80),
+                  Color(0xFF14052E),
                   // Color.fromARGB(255, 64, 112, 135),
                   // Color(0xFF521293),
                   // Color(0xFF14052E),
@@ -99,23 +103,38 @@ class _PlayScreenState extends State<PlayScreen> {
                         }
                         return _audioPlayer.builderCurrent(
                             builder: ((context, playing) {
+                          if (!playing.hasNext) {
+                            audioPlayer.setLoopMode(LoopMode.single);
+                          }
                           return Column(children: [
                             SizedBox(height: height * 0.10),
-                            QueryArtworkWidget(
-                                // size: 3000,
-                                // quality: 100,
-                                artworkQuality: FilterQuality.high,
-                                artworkHeight: height * 0.30,
-                                artworkWidth: height * 0.30,
-                                artworkBorder: BorderRadius.circular(150),
-                                artworkFit: BoxFit.cover,
-                                id: int.parse(playing.audio.audio.metas.id!),
-                                type: ArtworkType.AUDIO,
-                                nullArtworkWidget: CircleAvatar(
-                                  radius: height * 0.150,
-                                  backgroundImage: const AssetImage(
-                                      'assets/images/headphone.jpg'),
-                                )),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius:  BorderRadius.circular(height * 0.150),
+                                boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.6),
+                                  spreadRadius: 2,
+                                  blurRadius: 9,
+                                  
+                                ),
+                              ]),
+                              child: QueryArtworkWidget(
+                                  // size: 3000,
+                                  // quality: 100,
+                                  artworkQuality: FilterQuality.high,
+                                  artworkHeight: height * 0.30,
+                                  artworkWidth: height * 0.30,
+                                  artworkBorder: BorderRadius.circular(150),
+                                  artworkFit: BoxFit.cover,
+                                  id: int.parse(playing.audio.audio.metas.id!),
+                                  type: ArtworkType.AUDIO,
+                                  nullArtworkWidget: CircleAvatar(
+                                    radius: height * 0.150,
+                                    backgroundImage: const AssetImage(
+                                        'assets/images/null.jpg'),
+                                  )),
+                            ),
                             Column(
                               children: [
                                 Column(
@@ -181,7 +200,10 @@ class _PlayScreenState extends State<PlayScreen> {
                                       ),
                                       SizedBox(width: height * 0.26),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          playlistBottomSheet(playing.index,
+                                              context, createcontroller);
+                                        },
                                         icon: Icon(Icons.playlist_add,
                                             color:
                                                 Colors.white.withOpacity(0.8),
@@ -235,11 +257,11 @@ class _PlayScreenState extends State<PlayScreen> {
                                           },
                                           icon: (isShuffleon)
                                               ? const Icon(
-                                                  Icons.shuffle,
-                                                  color: Colors.green,
+                                                 CupertinoIcons.shuffle,
+                                                  color:image2,
                                                 )
                                               : const Icon(
-                                                  Icons.shuffle_outlined,
+                                                  CupertinoIcons.shuffle,
                                                   color: Colors.white,
                                                 ),
                                         ),
@@ -311,20 +333,29 @@ class _PlayScreenState extends State<PlayScreen> {
                                                 int.parse(playing
                                                     .audio.audio.metas.id!),
                                                 BuildContext)) {
-                                              addFavourites(int.parse(playing
-                                                  .audio.audio.metas.id!),context);
+                                              addFavourites(
+                                                  int.parse(playing
+                                                      .audio.audio.metas.id!),
+                                                  context);
                                             } else if (!checkFavourite(
                                                 int.parse(playing
                                                     .audio.audio.metas.id!),
-                                                BuildContext)){
-                                                  removeFav(int.parse(playing
-                                                    .audio.audio.metas.id!));
-                                                }
-                                              setState(() {
-                                                checkFavourite(int.parse(playing
-                                                    .audio.audio.metas.id!), BuildContext)!=checkFavourite(int.parse(playing
-                                                    .audio.audio.metas.id!), BuildContext);
-                                              });
+                                                BuildContext)) {
+                                              removeFav(
+                                                  int.parse(playing
+                                                      .audio.audio.metas.id!),
+                                                  context);
+                                            }
+                                            setState(() {
+                                              checkFavourite(
+                                                      int.parse(playing.audio
+                                                          .audio.metas.id!),
+                                                      BuildContext) !=
+                                                  checkFavourite(
+                                                      int.parse(playing.audio
+                                                          .audio.metas.id!),
+                                                      BuildContext);
+                                            });
                                           },
                                         ),
                                       ],

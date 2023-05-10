@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/screen/playscreen.dart';
-import 'package:music_player_1/widget/switch.dart';
+// import 'package:music_player_1/widget/switch.dart';
+// import 'package:music_player_1/widget/utilities.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class PopSongs extends StatefulWidget {
@@ -161,7 +162,7 @@ super.initState();
                   id:id , 
                   nullArtworkWidget: const CircleAvatar(
                     backgroundImage: AssetImage(
-                      'assets/images/headphone.jpg'),
+                      'assets/images/null.jpg'),
                       radius:24 ,
                   ),
                   type: ArtworkType.AUDIO),
@@ -200,7 +201,23 @@ super.initState();
                 ),
               ),
               SizedBox(width: height * 0.02),
-              SwitchCase(id: id),
+              IconButton(onPressed: () {
+                setState(() {
+                  playsong!.removeAt(index);
+                  playlistsong!.removeAt(widget.songindex!);
+                  Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                           PopSongs(playlistname: widget.playlistname, songindex: widget.songindex,),
+                    ));
+                });
+                playbox.putAt(index,PlayListDb(
+                  playlistname: widget.playlistname,
+                   playlistsongs: playsong));
+              }, 
+              icon: const Icon(Icons.delete_outline_outlined),
+              color: Colors.white.withOpacity(.8)),
               SizedBox(width: height * 0.03)
             ],
           ),

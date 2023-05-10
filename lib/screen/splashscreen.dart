@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/models/dbfunctions.dart';
+import 'package:music_player_1/models/mostplayedmodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/widget/bottam.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -49,8 +51,20 @@ class _SplashScreenState extends State<SplashScreen> {
               id: element.id),
         );
       }
+
+      for (var element in allSongs) {
+        mostlyplayedboxopen.add(
+          MostlyPlayedSongs(
+            songname: element.title, 
+            artist: element.artist, 
+            duration: element.duration, 
+            id: element.id, 
+            songurl: element.uri, 
+            count: 0)
+        );
+      }
     }
-    await Future.delayed(const Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 3));
 
     Navigator.pushReplacement(
         context,

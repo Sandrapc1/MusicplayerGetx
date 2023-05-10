@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/models/dbfunctions.dart';
+import 'package:music_player_1/models/mostplayedmodel.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
+import 'package:music_player_1/models/recentlymodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
+import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/widget/bottam.dart';
 import 'package:music_player_1/screen/favlist.dart';
 import 'package:music_player_1/screen/mostplayed.dart';
@@ -15,8 +19,11 @@ import 'package:music_player_1/screen/recently.dart';
 import 'package:music_player_1/widget/switch.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../models/dbfunctions.dart';
+// import '../models/dbfunctions.dart';
+import '../widget/utilities.dart';
+
 // import 'bottam.dart';
+bool isPlaying = false;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,17 +31,19 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
-
+Map isPlayingMap={};
 final songsbox = SongBox.getInstance();
 final AssetsAudioPlayer audioPlayer = AssetsAudioPlayer.withId('0');
+final TextEditingController createcontroller = TextEditingController();
+final recentbox = RecentlyBox.getInstance();
+final List<MostlyPlayedSongs>mostplayedsong=mostlyplayedboxopen.values.toList();
+List<MostlyPlayedSongs>mostfulllist=[];
 
 class _HomeState extends State<Home> {
   var size, height, width;
   final playlistbox = PlaylistBox.getInstance();
   late List<PlayListDb> playlistsong = playlistbox.values.toList();
   final TextEditingController addcontroller = TextEditingController();
-  final TextEditingController createcontroller = TextEditingController();
-
 
   List<Audio> allsongs = [];
   @override
@@ -57,6 +66,15 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    if (isPlaying) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        showBottomSheet(
+          backgroundColor: bgcolor,
+          context: context,
+          builder: (context) => const MiniPlayer(),
+        );
+      });
+    }
     size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -230,12 +248,18 @@ class _HomeState extends State<Home> {
                     builder: (context, Box<Songs> allsongbox, child) {
                       List<Songs> allDbsongs = allsongbox.values.toList();
                       return ListView.separated(
+                          padding: EdgeInsets.only(bottom: width * .3),
                           itemBuilder: (context, songindex) {
                             return musicList(
                                 allDbsongs[songindex].songname!,
                                 allDbsongs[songindex].artist!,
                                 allDbsongs[songindex].id,
-                                songindex);
+                                songindex,
+                                 allDbsongs,
+                                allDbsongs[songindex].duration!,
+                                // mostplayedsong,
+                                
+                               );
                           },
                           shrinkWrap: true,
                           physics: const BouncingScrollPhysics(),
@@ -255,22 +279,32 @@ class _HomeState extends State<Home> {
     );
   }
 
-  musicList(String title, String artist, id, songindex) {
+  musicList( String title, String artist, id, songindex, allDbsongs,duration,) {
+    MostlyPlayedSongs mostsong=mostplayedsong[songindex];    
+    RecentlyPlayedSongs recentsongs;
+    Songs songs = allDbsongs[songindex];
     return Padding(
       padding: EdgeInsets.all(width * 0.008),
       child: InkWell(
         onTap: () {
+          recentsongs=RecentlyPlayedSongs(
+            songname: songs.songname, 
+            artist: songs.artist, 
+            duration: songs.duration, 
+            songurl: songs.songurl,
+              id: songs.id);
+              addrecentlyplayed(recentsongs);
+              addPlayedSongsCount(mostsong, songindex);
           PlayScreen.playscreenindex.value = songindex;
           audioPlayer.open(
             Playlist(audios: allsongs, startIndex: songindex),
             headPhoneStrategy: HeadPhoneStrategy.pauseOnUnplugPlayOnPlug,
             showNotification: true,
           );
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlayScreen(),
-              ));
+
+          audioPlayer.setLoopMode(LoopMode.playlist);
+          isPlaying = true;
+          setState(() {});
         },
         child: Container(
           // width: 30,
@@ -282,15 +316,14 @@ class _HomeState extends State<Home> {
                 color: strokecolor,
               )),
           height: height * 0.09,
-          child: Row(mainAxisAlignment: MainAxisAlignment.start,
-           children: [
+          child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
             Padding(
               padding: const EdgeInsets.all(5),
               child: QueryArtworkWidget(
                   id: id,
                   nullArtworkWidget: const CircleAvatar(
                       backgroundImage: AssetImage(
-                        'assets/images/headphone.jpg',
+                        'assets/images/null.jpg',
                       ),
                       radius: 24),
                   type: ArtworkType.AUDIO),
@@ -329,122 +362,12 @@ class _HomeState extends State<Home> {
             ),
             // SizedBox(width: height * 0.01),
             SwitchCase(id: id),
-           
+
             // SizedBox(width: height * 0.01),
             PopupMenuButton(
               color: bkclr,
               onSelected: (value) {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.white70,
-                  builder: (context) => SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          TextButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      content: TextField(
-                                        controller: createcontroller,
-                                        onChanged: (value) {},
-                                        decoration: const InputDecoration(
-                                            hintText: 'Enter Folder Name'),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text(
-                                              'Cancel',
-                                              style:
-                                                  TextStyle(color: Colors.red),
-                                            )),
-                                        TextButton(
-                                            onPressed: () {
-                                              if (createcontroller
-                                                      .text.isEmpty ||
-                                                  createcontroller.text ==null) {
-                                                createcontroller.clear();
-                                                Navigator.pop(context);
-                                                const snackBar = SnackBar(
-                                                  backgroundColor: Colors.green,
-                                                  content:
-                                                      Text('Name is Empty'),
-                                                  dismissDirection:
-                                                      DismissDirection.down,
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  elevation: 30,
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                );
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(snackBar);
-                                              } else {
-                                                createplaylist(
-                                                    createcontroller.text,
-                                                    context);
-                                                  Navigator.pop(context);
-                                              }
-                                            },
-                                            child: const Text(
-                                              'Create',
-                                              style: TextStyle(
-                                                  color: Colors.green),
-                                            ))
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Your PlayList',
-                                    style: GoogleFonts.lato(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20),
-                                  ),
-                                  SizedBox(width: height * 0.11),
-                                  const Icon(
-                                    Icons.add,
-                                    size: 35,
-                                  ),
-                                ],
-                              )),
-                          //  SizedBox(height: height*0.02,),
-                          ValueListenableBuilder(
-                            valueListenable: playlistbox.listenable(),
-                            builder: (context, playlistsongs, child) {
-                              List<PlayListDb> playlistsongdb =
-                                  playlistsongs.values.toList();
-                              return ListView.separated(
-                                itemBuilder: (context, index) => playlists(
-                                    playlistsongdb[index].playlistname!,
-                                    playlistsongs,
-                                    index,songindex,playlistsongdb),
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(
-                                  height: 10,
-                                ),
-                                itemCount: playlistsongdb.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                playlistBottomSheet(songindex, context, createcontroller);
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(
@@ -459,68 +382,5 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  Widget playlists(String title, Box<PlayListDb> playlistsongs, index,songindex,playlistsongdb) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-           onTap: () {
-            // playlist songs add
-            
-              PlayListDb? playsongs = playlistsongs.getAt(index);
-              List<Songs>playsongdb=playsongs!.playlistsongs!;
-              List<Songs>songdb=songsbox.values.toList();
-              bool isThere=playsongdb.any((element) => element.id==songdb[songindex].id);
-              if (!isThere) {
-                playsongdb.add(
-                  Songs(
-                    songname: songdb[songindex].songname,
-                     artist: songdb[songindex].artist, 
-                     duration: songdb[songindex].duration, 
-                     songurl:songdb[songindex].songurl, 
-                     id: songdb[songindex].id)
-                     );
-              }
-              playlistsongs.putAt(index, PlayListDb(
-                playlistname: playlistsongdb[index].playlistname,
-                 playlistsongs: playsongdb)
-                 );
-                 Navigator.pop(context);
-                 const snackbar=SnackBar(
-                  backgroundColor: bkclr,
-                  content: Text('Song Added',style: TextStyle(color: Colors.black),),
-                  dismissDirection: DismissDirection.down,
-                  behavior: SnackBarBehavior.floating,
-                  elevation: 30,
-                  duration: Duration(seconds: 1),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackbar);
-            },
-     child:  Row(
-        children: [
-         
-         
-             Container(
-              height: height * 0.07,
-              width: height * 0.08,
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/spotify.jpg'),
-                  fit: BoxFit.cover,
-                ),
-                border: Border.all(
-                  color: Colors.black,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          
-          SizedBox(width: height * 0.04),
-          Text(title)
-        ],
-      ),
-      )
-    );
-  }
+  
 }

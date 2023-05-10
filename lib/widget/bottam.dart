@@ -8,6 +8,7 @@ import 'package:music_player_1/screen/account.dart';
 import 'package:music_player_1/screen/home.dart';
 import 'package:music_player_1/screen/playlist.dart';
 import 'package:music_player_1/screen/search.dart';
+import 'package:music_player_1/widget/privacy.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BottamNavication extends StatefulWidget {
@@ -45,7 +46,7 @@ class _BottamNavicationState extends State<BottamNavication> {
         bottomNavigationBar: CurvedNavigationBar(
           color: const Color(0xFF27006B),
           backgroundColor: Colors.transparent,
-          height: 60,
+          height: height*0.08,
           index: index,
           items: items,
           onTap: (index) => setState(() {
@@ -108,34 +109,33 @@ class _BottamNavicationState extends State<BottamNavication> {
           SizedBox(height: height * 0.006),
           ListTile(
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          const Text('Beat Route V1.0',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20)),
-                          SizedBox(height: height * 0.01),
-                          const Text(
-                            'A privacy policy for an offline music player will explain how the app collects and uses information, as well as what measures are taken to protect user privacy. It may include details on what personal information is collected, how that information is used, and whether it is shared with third parties.',
-                            style: TextStyle(fontSize: 15),
-                          )
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('OK')),
-                    ],
-                  );
-                },
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicy(),));
+              // showDialog(
+              //   context: context,
+              //   builder: (context) {
+              //     return  SingleChildScrollView(
+              //         child: Column(
+              //           children: [
+              //             const Text('Beat Route V1.0',
+              //                 style: TextStyle(
+              //                     fontWeight: FontWeight.bold, fontSize: 20)),
+              //             SizedBox(height: height * 0.01),
+                          
+              //             // const Text(
+              //             //   'A privacy policy for an offline music player will explain how the app collects and uses information, as well as what measures are taken to protect user privacy. It may include details on what personal information is collected, how that information is used, and whether it is shared with third parties.',
+              //             //   style: TextStyle(fontSize: 15),
+              //             // ),
+              //           // TextButton(onPressed: () {
+              //           //   Navigator.of(context).pop();
+              //           // }, child: const Text('OK'))
+              //           ],
+                        
+              //         ),
+              //       );
+                    
+                  
+              //   },
+              // );
             },
             title: const Text(
               'Privacy policy',
