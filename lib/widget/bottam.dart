@@ -92,7 +92,7 @@ class _BottamNavicationState extends State<BottamNavication> {
           ListTile(
             onTap: ()  {
               // await Share.shareXFiles('');
-             Share.share('https://github.com/Sandrapc1/music_player');
+             Share.share('https://play.google.com/store/apps/details?id=in.apps.beat_route');
             },
             title: const Text(
               'Shareapp',

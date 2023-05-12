@@ -48,6 +48,7 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool playerDone = true;
     size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -110,15 +111,15 @@ class _PlayScreenState extends State<PlayScreen> {
                             SizedBox(height: height * 0.10),
                             Container(
                               decoration: BoxDecoration(
-                                borderRadius:  BorderRadius.circular(height * 0.150),
-                                boxShadow: <BoxShadow>[
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.6),
-                                  spreadRadius: 2,
-                                  blurRadius: 9,
-                                  
-                                ),
-                              ]),
+                                  borderRadius:
+                                      BorderRadius.circular(height * 0.150),
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.6),
+                                      spreadRadius: 2,
+                                      blurRadius: 9,
+                                    ),
+                                  ]),
                               child: QueryArtworkWidget(
                                   // size: 3000,
                                   // quality: 100,
@@ -257,8 +258,8 @@ class _PlayScreenState extends State<PlayScreen> {
                                           },
                                           icon: (isShuffleon)
                                               ? const Icon(
-                                                 CupertinoIcons.shuffle,
-                                                  color:image2,
+                                                  CupertinoIcons.shuffle,
+                                                  color: image2,
                                                 )
                                               : const Icon(
                                                   CupertinoIcons.shuffle,
@@ -268,7 +269,12 @@ class _PlayScreenState extends State<PlayScreen> {
                                         // SizedBox(width: height * 0.010),
                                         IconButton(
                                           onPressed: () async {
-                                            await _audioPlayer.previous();
+                                            if (playerDone == true) {
+                                              playerDone = false;
+                                              await _audioPlayer.previous();
+
+                                              playerDone = true;
+                                            }
                                           },
                                           icon: Icon(
                                               Icons.skip_previous_outlined,
@@ -303,7 +309,11 @@ class _PlayScreenState extends State<PlayScreen> {
                                         ),
                                         IconButton(
                                             onPressed: () async {
-                                              await _audioPlayer.next();
+                                              if (playerDone == true) {
+                                                playerDone = false;
+                                                await _audioPlayer.next();
+                                                playerDone = true;
+                                              }
                                             },
                                             icon: Icon(
                                               Icons.skip_next_outlined,
