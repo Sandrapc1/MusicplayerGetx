@@ -110,32 +110,7 @@ class _BottamNavicationState extends State<BottamNavication> {
           ListTile(
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicy(),));
-              // showDialog(
-              //   context: context,
-              //   builder: (context) {
-              //     return  SingleChildScrollView(
-              //         child: Column(
-              //           children: [
-              //             const Text('Beat Route V1.0',
-              //                 style: TextStyle(
-              //                     fontWeight: FontWeight.bold, fontSize: 20)),
-              //             SizedBox(height: height * 0.01),
-                          
-              //             // const Text(
-              //             //   'A privacy policy for an offline music player will explain how the app collects and uses information, as well as what measures are taken to protect user privacy. It may include details on what personal information is collected, how that information is used, and whether it is shared with third parties.',
-              //             //   style: TextStyle(fontSize: 15),
-              //             // ),
-              //           // TextButton(onPressed: () {
-              //           //   Navigator.of(context).pop();
-              //           // }, child: const Text('OK'))
-              //           ],
-                        
-              //         ),
-              //       );
-                    
-                  
-              //   },
-              // );
+             
             },
             title: const Text(
               'Privacy policy',

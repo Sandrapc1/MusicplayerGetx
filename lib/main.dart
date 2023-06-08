@@ -23,8 +23,6 @@ Future<void> main() async {
   Hive.registerAdapter(MostlyPlayedSongsAdapter());
   openmostlyBox();
 
-  
-
   runApp(const MyApp());
 }
 
