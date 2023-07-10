@@ -1,44 +1,28 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
-
-// import 'dart:ffi';
-
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:blurrycontainer/blurrycontainer.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
-import 'package:music_player_1/models/recentlymodel.dart';
+import 'package:music_player_1/controller/recently_controller.dart';
 import 'package:music_player_1/screen/home.dart';
-import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/screen/playscreen.dart';
-import 'package:music_player_1/widget/switch.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../widget/utilities.dart';
-// import 'package:flutter/src/widgets/framework.dart';
-// import 'package:flutter/src/widgets/placeholder.dart';
-
 bool _isPlaying=false;
-class RecentlyPlayed extends StatefulWidget {
-  const RecentlyPlayed({super.key});
+ List<Audio> recentaudio = [];
+ 
 
-  @override
-  State<RecentlyPlayed> createState() => _RecentlyPlayedState();
-}
-
-class _RecentlyPlayedState extends State<RecentlyPlayed> {
-  List<Audio> recentaudio = [];
-  @override
-  initState() {
-    recentlySongdsAudio();
-    super.initState();
-  }
+// ignore: must_be_immutable
+class RecentlyPlayed extends StatelessWidget {
+   RecentlyPlayed({super.key});
 
   var size, height, width;
   bool favorites = false;
+  
   @override
   Widget build(BuildContext context) {
+    final RecentlyPlayedController recentcontroller = Get.put(RecentlyPlayedController());
     size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -48,7 +32,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
         appBar: AppBar(
           leading: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Get.back();
               },
               icon: const Icon(
                 Icons.arrow_back,
@@ -66,7 +50,6 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                   colors: [
                 Color(0xFF14052E),
                 Color(0xFF643D80),
-                // Color(0xFF3487B2),
                 Color(0xFF521293),
                 Color(0xFF14052E),
               ])),
@@ -134,10 +117,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                           showNotification: true,
                           );
                         audioPlayer.play();
-                        setState(() {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => PlayScreen(),));
-                          _isPlaying=!_isPlaying;
-                        });
+                        Get.to(PlayScreen());
                         },
                         child: Icon(
                           Icons.play_arrow_rounded,
@@ -150,49 +130,60 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                 ),
 
                 // height: height /1.6,
-                ValueListenableBuilder<Box<RecentlyPlayedSongs>>(
-                  valueListenable: recentbox.listenable(),
-                  builder: (context, dbrecent, child) {
-                    List<RecentlyPlayedSongs> recentsongs =
-                        dbrecent.values.toList().reversed.toList();
-                    return ListView.separated(
+
+
+
+                Obx(() => 
+                     ListView.separated(
                       padding:EdgeInsets.only(bottom: width * .3),
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemBuilder: (context, index) => recentsongs.isNotEmpty
+                        itemBuilder: (context, index) => recentcontroller.recentlygetx.isNotEmpty
                             ? GestureDetector(
                                 onTap: () {
                                   audioPlayer.open(
                                       Playlist(
-                                          audios: recentaudio,
+                                          audios: recentcontroller.recentlyconvert,
                                           startIndex: index),
                                       showNotification: true,
                                       loopMode: LoopMode.playlist);
                                 },
-                                child: songList(
-                                    recentsongs[index].id,
-                                    recentsongs[index].songname,
-                                    recentsongs[index].artist,
-                                    index),
+                                child: RecentlySongTileextends(recentcntrl: recentcontroller, index: index),
                               )
-                            : const SizedBox(),
+                            : SizedBox(
+                            height: height * 0.3,
+                            child: const Center(
+                                child: Text(
+                              'No songs found',
+                              style: TextStyle(color: bkclr),
+                            )),
+                          ),
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 10),
-                        itemCount: recentsongs.length);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomSheet: Container(
-          color: bgcolor,
-          child: const MiniPlayer()),
-      ),
-    );
+                        itemCount:  recentcontroller.recentlygetx.length)
+                        )
+                        ])
+                        )
+                        )
+                        ));
+                  }
   }
 
-  Widget songList(id, title, artist, index) {
+
+class RecentlySongTileextends extends StatelessWidget {
+ final RecentlyPlayedController recentcntrl;
+ final int index;
+  const RecentlySongTileextends({
+  super.key, 
+  required this.recentcntrl, 
+  required this.index
+  });
+
+  @override
+  Widget build(BuildContext context) {
+   var size = MediaQuery.of(context).size;
+   var  height = size.height;
+   
     return Padding(
       padding: EdgeInsets.only(left: height * 0.01, right: height * 0.01),
       child: Container(
@@ -209,7 +200,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
             Padding(
                 padding: const EdgeInsets.all(5),
                 child: QueryArtworkWidget(
-                  id: id,
+                  id: recentcntrl.recentlygetx[index].id!,
                   type: ArtworkType.AUDIO,
                   nullArtworkWidget: const CircleAvatar(
                     backgroundImage: AssetImage('assets/images/null.jpg'),
@@ -224,7 +215,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
+                  Text(recentcntrl.recentlygetx[index].songname!,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.lato(
                         color: Colors.white,
@@ -233,7 +224,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(artist,
+                  Text(recentcntrl.recentlygetx[index].artist!,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.lato(
                         color: Colors.white,
@@ -243,12 +234,13 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
               ),
             ),
             SizedBox(width: height * 0.02),
-            SwitchCase(id: id),
+            // FavoriteButton(id: id),
+            // SwitchCase(id: id),
             PopupMenuButton(
               color: bkclr,
-              onSelected: (value) {
-               playlistBottomSheet(index, context, createcontroller);
-              },
+              // onSelected: (value) {
+              //  playlistBottomSheet(index, context, createcontroller);
+              // },
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: 1,
@@ -262,18 +254,5 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
         ), 
       ),
     );
-  }
-
-  recentlySongdsAudio() {
-    final List<RecentlyPlayedSongs> recentlyplayed =
-        recentbox.values.toList().reversed.toList();
-    for (var element in recentlyplayed) {
-      recentaudio.add(Audio.file(element.songurl.toString(),
-          metas: Metas(
-            title: element.songname,
-            artist: element.artist,
-            id: element.id.toString(),
-          )));
-    }
   }
 }

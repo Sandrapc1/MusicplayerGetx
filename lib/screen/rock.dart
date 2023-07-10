@@ -43,12 +43,6 @@ class _RockSongsState extends State<RockSongs> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                // Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF14052E),
-                // Color(0xFF643D80),
-                // Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF521293),
-                // Color(0xFF14052E),
                  Color(0xFF643D80),
                 Color.fromARGB(255, 64, 112, 135),
               ],
@@ -77,7 +71,6 @@ class _RockSongsState extends State<RockSongs> {
             border: Border.all(
               width: 2,
               color:mostfill
-              //  const Color.fromARGB(255, 155, 151, 152),
             )),
         height: height * 0.09,
         child: Row(

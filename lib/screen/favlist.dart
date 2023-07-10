@@ -1,9 +1,12 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:blurrycontainer/blurrycontainer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/controller/favourite_controller.dart';
 import 'package:music_player_1/models/dbfunctions.dart';
 import 'package:music_player_1/models/favouritesmodel.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
@@ -11,59 +14,29 @@ import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/screen/home.dart';
 import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/screen/playscreen.dart';
-// import 'package:music_player_1/screen/splashscreen.dart';
 import 'package:music_player_1/widget/bottam.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
+// ignore: unused_element
 bool _isPlaying = false;
+final FavoriteController favController = Get.put(FavoriteController());
+List<Audio> favconveraudio = [];
 
-class FavoutitsPage extends StatefulWidget {
+
+// ignore: must_be_immutable
+class FavoutitsPage extends StatelessWidget {
   // ignore: use_key_in_widget_constructors
-  const FavoutitsPage({Key? key});
+  FavoutitsPage({Key? key});
 
-  @override
-  State<FavoutitsPage> createState() => _FavoutitsPageState();
-}
-
-final Songbox = SongBox.getInstance();
-// final _audioPlayer = AssetsAudioPlayer.withId('0');
-
-class _FavoutitsPageState extends State<FavoutitsPage> {
   late double height, width;
   final List<Favourites> favourite = [];
-  final favbox = Favouritesbox.getInstance();
-  late List<Favourites> fav = favbox.values.toList();
-  List<Audio> favconveraudio = [];
   bool favorites = true;
   final playlistbox = PlaylistBox.getInstance();
-
   late List<PlayListDb> playlistsong = playlistbox.values.toList();
   final TextEditingController createcontroller = TextEditingController();
 
   @override
-  void initState() {
-    final List<Favourites> favallsongs =
-        favbox.values.toList().reversed.toList();
-    for (var element in favallsongs) {
-      favconveraudio.add(Audio.file(element.songurl.toString(),
-          metas: Metas(
-            title: element.songname,
-            artist: element.artist,
-            id: element.id.toString(),
-          )));
-    }
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    //  if(_isPlaying){
-    //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //     showBottomSheet(
-    //       backgroundColor:bgcolor,
-    //       context: context, builder: (context) => const MiniPlayer(),);
-    //   });
-    // }
     final size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -149,7 +122,6 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 24,
-                                  
                                 ),
                               ),
                             ],
@@ -168,14 +140,9 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                             showNotification: true,
                           );
                           audioPlayer.play();
-                          setState(() {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PlayScreen(),
-                                ));
-                            _isPlaying = !_isPlaying;
-                          });
+                          Get.to(
+                            PlayScreen(),
+                          );
                         },
                         child: Icon(
                           Icons.play_arrow_rounded,
@@ -187,36 +154,31 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                   ],
                 ),
 
-                // height: height /1.6,
 
-                ValueListenableBuilder(
-                    valueListenable: favbox.listenable(),
-                    builder: (context, fav, child) {
-                      List<Favourites> favourite1 =
-                          fav.values.toList().reversed.toList();
-                      return favourite1.isNotEmpty
-                          ? ListView.separated(
-                              padding: EdgeInsets.only(bottom: width * .3),
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) => songList(
-                                  favourite1[index].id!,
-                                  favourite1[index].songname!,
-                                  favourite1[index].artist!,
-                                  index),
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 10),
-                              itemCount: favourite1.length)
-                          : SizedBox(
-                              height: height / 1.6,
-                              child: const Center(
-                                child: Text(
-                                  'No songs found',
-                                  style: TextStyle(color: bkclr),
-                                ),
+                Obx(() =>
+                    favController.favgetx.isNotEmpty
+                        ? ListView.separated(
+                            padding: EdgeInsets.only(bottom: width * .3),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) => songList(
+                                favController.favgetx[index].id!,
+                                favController.favgetx[index].songname!,
+                                favController.favgetx[index].artist!,
+                                index,
+                                context),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                            itemCount: favController.favgetx.length)
+                        : SizedBox(
+                            height: height / 1.6,
+                            child: const Center(
+                              child: Text(
+                                'No songs found',
+                                style: TextStyle(color: bkclr),
                               ),
-                            );
-                    }),
+                            ),
+                          )),
               ],
             ),
           ),
@@ -226,7 +188,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
     );
   }
 
-  Widget songList(id, title, artist, index) {
+  Widget songList(id, title, artist, index, context) {
     return Padding(
       padding: EdgeInsets.only(left: height * 0.01, right: height * 0.01),
       child: InkWell(
@@ -245,8 +207,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: fillcolor,
-              border: Border.all(width: 3, color: mostfill
-                  //  const Color.fromARGB(255, 155, 151, 152),
+              border: Border.all(width: 3, color: mostfill,
                   )),
           height: height * 0.09,
           child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -295,13 +256,13 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
               ),
               onPressed: () {
                 // removed context
-                deletefav(index);
+                favController.deletefav(index);
 
                 Navigator.pushReplacement(
-                    context,
+                    context as BuildContext,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
-                          const FavoutitsPage(),
+                          FavoutitsPage(),
                     ));
                 const snackBar = SnackBar(
                   backgroundColor: delete,
@@ -311,7 +272,8 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                   elevation: 20,
                   duration: Duration(seconds: 1),
                 );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(snackBar);
               },
             ),
             // SizedBox(width: height * 0.03),
@@ -352,6 +314,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                             onPressed: () {
                                               if (createcontroller
                                                       .text.isEmpty ||
+                                                  // ignore: unnecessary_null_comparison
                                                   createcontroller.text ==
                                                       null) {
                                                 createcontroller.clear();
@@ -404,7 +367,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                   ),
                                 ],
                               )),
-                          //  SizedBox(height: height*0.02,),
+                        
                           ValueListenableBuilder(
                             valueListenable: playlistbox.listenable(),
                             builder: (context, playlistsongs, child) {
@@ -416,7 +379,8 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                                     playlistsongs,
                                     index,
                                     index,
-                                    playlistsongdb),
+                                    playlistsongdb,
+                                    context),
                                 separatorBuilder: (context, index) =>
                                     const SizedBox(
                                   height: 10,
@@ -448,14 +412,14 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
   }
 
   Widget playlists(String title, Box<PlayListDb> playlistsongs, index,
-      songindex, playlistsongdb) {
+      songindex, playlistsongdb, context) {
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child: GestureDetector(
           onTap: () {
             PlayListDb? playsongs = playlistsongs.getAt(index);
             List<Songs> playsongdb = playsongs!.playlistsongs!;
-            List<Favourites> songdb = favbox.values.toList();
+            List<Favourites> songdb = favController.favbox.values.toList();
             bool isThere =
                 playsongdb.any((element) => element.id == songdb[songindex].id);
             if (!isThere) {
@@ -471,7 +435,7 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
                 PlayListDb(
                     playlistname: playlistsongdb[index].playlistname,
                     playlistsongs: playsongdb));
-            Navigator.pop(context);
+            Navigator.pop(context as BuildContext);
             const snackbar = SnackBar(
               backgroundColor: bkclr,
               content: Text(
@@ -483,7 +447,8 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
               elevation: 30,
               duration: Duration(seconds: 1),
             );
-            ScaffoldMessenger.of(context).showSnackBar(snackbar);
+            ScaffoldMessenger.of(context as BuildContext)
+                .showSnackBar(snackbar);
           },
           child: Row(
             children: [
@@ -508,4 +473,17 @@ class _FavoutitsPageState extends State<FavoutitsPage> {
           ),
         ));
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('height', height));
+    properties.add(DoubleProperty('width', width));
+  }
 }
+
+// ignore: non_constant_identifier_names
+final Songbox = SongBox.getInstance();
+
+
+

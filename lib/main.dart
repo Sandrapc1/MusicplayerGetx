@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/models/favouritesmodel.dart';
 import 'package:music_player_1/models/mostplayedmodel.dart';
@@ -37,7 +39,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Beat Route',
       color: const Color(0xFF9A0D3C),

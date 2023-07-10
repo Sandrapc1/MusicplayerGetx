@@ -56,6 +56,7 @@ class _PlayListState extends State<PlayList> {
                     TextButton(
                         onPressed: () {
                           if (textcontroller.text.isEmpty ||
+                              // ignore: unnecessary_null_comparison
                               textcontroller.text == null) {
                             Navigator.pop(context);
                             const snackBar = SnackBar(
@@ -229,6 +230,7 @@ class _PlayListState extends State<PlayList> {
                         TextButton(
                             onPressed: () {
                               if ((editcontroller.text.isEmpty ||
+                                  // ignore: unnecessary_null_comparison
                                   editcontroller.text == null)) {
                                 Navigator.pop(context);
                                 editcontroller.clear();
@@ -283,8 +285,8 @@ class _PlayListState extends State<PlayList> {
                   
                   // titlePadding: EdgeInsets.only(left: height*0.1),
                   
-                  title: Column(
-                    children: const [
+                  title: const Column(
+                    children: [
                        Text('Delete playlist'),
                     ],
                   ),

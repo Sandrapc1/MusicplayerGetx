@@ -38,6 +38,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.14
+  get: ^4.6.5
   google_fonts: ^4.0.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -45,7 +46,6 @@ dependencies:
   on_audio_query: ^2.7.0
   permission_handler: ^10.2.0
   share_plus: ^6.3.1
-  # shared_preferences: ^2.0.15
   shared_preferences_android: ^2.1.4
   text_scroll: ^0.2.0
 

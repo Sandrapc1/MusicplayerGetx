@@ -6,10 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/models/playlistmodel.dart';
 import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/screen/playscreen.dart';
-// import 'package:music_player_1/widget/switch.dart';
-// import 'package:music_player_1/widget/utilities.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
+// ignore: must_be_immutable
 class PopSongs extends StatefulWidget {
    PopSongs({
     super.key,required this.songindex,required this.playlistname});
@@ -55,7 +54,6 @@ super.initState();
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        // backgroundColor: bgcolor,
         appBar: AppBar(
           title: const Text(
             'PlayList Songs',
@@ -79,12 +77,8 @@ super.initState();
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                // Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF14052E),
                 Color(0xFF643D80),
                 Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF521293),
-                // Color(0xFF14052E),
               ],
             ),
           ),
@@ -150,7 +144,6 @@ super.initState();
               borderRadius: BorderRadius.circular(10),
               color: fillcolor,
               border: Border.all(width: 2, color: mostfill
-                  //  const Color.fromARGB(255, 155, 151, 152),
                   )),
           height: height * 0.09,
           child: Row(

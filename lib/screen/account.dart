@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/colors/colors.dart';
-// import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/widget/bottam.dart';
 import 'package:music_player_1/screen/favlist.dart';
 import 'package:music_player_1/screen/mostplayed.dart';
 import 'package:music_player_1/screen/playlist.dart';
 
-// import 'home.dart';
 
 class Account extends StatefulWidget {
   const Account({Key? key}) : super(key: key);
@@ -43,7 +41,6 @@ class _AccountState extends State<Account> {
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: height * 0.03),
               Row(
@@ -155,7 +152,7 @@ class _AccountState extends State<Account> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const FavoutitsPage()));
+                          builder: (context) =>  FavoutitsPage()));
                 },
                 child: Row(
                   children: [
@@ -183,7 +180,7 @@ class _AccountState extends State<Account> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const MostPlayed()));
+                          builder: (context) =>  MostPlayed()));
                 },
                 child: Row(
                   children: [

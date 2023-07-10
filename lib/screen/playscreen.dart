@@ -8,14 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
-import 'package:music_player_1/models/dbfunctions.dart';
 import 'package:music_player_1/models/songmodel.dart';
+import 'package:music_player_1/screen/favlist.dart';
 import 'package:music_player_1/screen/home.dart';
-// import 'package:music_player_1/screen/splashscreen.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:text_scroll/text_scroll.dart';
-
-import '../widget/utilities.dart';
 
 // ignore: must_be_immutable
 class PlayScreen extends StatefulWidget {
@@ -34,17 +31,9 @@ class _PlayScreenState extends State<PlayScreen> {
   final box = SongBox.getInstance();
   bool isShuffleon = false;
   bool isRepeat = false;
-  // final audioPlayer=AudioPlayer();
-  // @override
-  // void dispose(){
-  //   audioPlayer.dispose();
-  //   super.dispose();
-  // }
-
   double currentSlidervalue = 20;
   bool playarrow = false;
   bool fav = false;
-  // bool volume = false;
 
   @override
   Widget build(BuildContext context) {
@@ -76,12 +65,8 @@ class _PlayScreenState extends State<PlayScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  // Color.fromARGB(255, 64, 112, 135),
                   Color(0xFF643D80),
                   Color(0xFF14052E),
-                  // Color.fromARGB(255, 64, 112, 135),
-                  // Color(0xFF521293),
-                  // Color(0xFF14052E),
                 ],
               ),
             ),
@@ -97,6 +82,7 @@ class _PlayScreenState extends State<PlayScreen> {
                             child: CircularProgressIndicator(),
                           );
                         }
+                        // ignore: unnecessary_null_comparison
                         if (allSongs == null) {
                           return const Center(
                             child: CircularProgressIndicator(),
@@ -121,8 +107,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                     ),
                                   ]),
                               child: QueryArtworkWidget(
-                                  // size: 3000,
-                                  // quality: 100,
                                   artworkQuality: FilterQuality.high,
                                   artworkHeight: height * 0.30,
                                   artworkWidth: height * 0.30,
@@ -150,7 +134,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                           color: bkclr,
                                           fontSize: 25,
                                         ),
-                                        // overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     SizedBox(height: height * 0.01),
@@ -160,7 +143,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                         color: bkclr,
                                         fontSize: 15,
                                       ),
-                                      // overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
@@ -202,8 +184,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                       SizedBox(width: height * 0.26),
                                       IconButton(
                                         onPressed: () {
-                                          playlistBottomSheet(playing.index,
-                                              context, createcontroller);
                                         },
                                         icon: Icon(Icons.playlist_add,
                                             color:
@@ -228,8 +208,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                       child: ProgressBar(
                                         baseBarColor: bkclr,
                                         thumbRadius: 7,
-                                        // thumbColor: bc,
-                                        // progressBarColor: Colors.black,
                                         timeLabelTextStyle:
                                             const TextStyle(color: bkclr),
                                         progress: position,
@@ -266,7 +244,6 @@ class _PlayScreenState extends State<PlayScreen> {
                                                   color: Colors.white,
                                                 ),
                                         ),
-                                        // SizedBox(width: height * 0.010),
                                         IconButton(
                                           onPressed: () async {
                                             if (playerDone == true) {
@@ -322,10 +299,10 @@ class _PlayScreenState extends State<PlayScreen> {
                                               size: 40,
                                             )),
                                         IconButton(
-                                          icon: (checkFavourite(
+                                          icon: (favController. checkFavourite(
                                                   int.parse(playing
                                                       .audio.audio.metas.id!),
-                                                  BuildContext))
+                                                  ))
                                               ? Icon(
                                                   Icons.favorite_outlined,
                                                   color: Colors.white
@@ -339,32 +316,32 @@ class _PlayScreenState extends State<PlayScreen> {
                                                   size: 30,
                                                 ),
                                           onPressed: () {
-                                            if (checkFavourite(
+                                            if (favController. checkFavourite(
                                                 int.parse(playing
                                                     .audio.audio.metas.id!),
-                                                BuildContext)) {
-                                              addFavourites(
+                                                )) {
+                                             favController.addFavourites(
                                                   int.parse(playing
                                                       .audio.audio.metas.id!),
-                                                  context);
-                                            } else if (!checkFavourite(
+                                                  );
+                                            } else if (! favController. checkFavourite(
                                                 int.parse(playing
                                                     .audio.audio.metas.id!),
-                                                BuildContext)) {
-                                              removeFav(
+                                                )) {
+                                              favController.removeFav(
                                                   int.parse(playing
                                                       .audio.audio.metas.id!),
                                                   context);
                                             }
                                             setState(() {
-                                              checkFavourite(
+                                              favController. checkFavourite(
                                                       int.parse(playing.audio
                                                           .audio.metas.id!),
-                                                      BuildContext) !=
-                                                  checkFavourite(
+                                                      ) !=
+                                                  favController. checkFavourite(
                                                       int.parse(playing.audio
                                                           .audio.metas.id!),
-                                                      BuildContext);
+                                                      );
                                             });
                                           },
                                         ),

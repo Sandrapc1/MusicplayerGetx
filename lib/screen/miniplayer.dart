@@ -1,27 +1,26 @@
 import 'dart:async';
-
+import 'dart:developer';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/models/dbfunctions.dart';
+import 'package:music_player_1/models/songmodel.dart';
 import 'package:music_player_1/screen/home.dart';
 import 'package:music_player_1/screen/playscreen.dart';
 import 'package:music_player_1/widget/playpause.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class MiniPlayer extends StatefulWidget {
+class MiniPlayer extends StatelessWidget {
   const MiniPlayer({
     super.key,
   });
 
   @override
-  State<MiniPlayer> createState() => _MiniPlayerState();
-}
-
-class _MiniPlayerState extends State<MiniPlayer> {
-  @override
   Widget build(BuildContext context) {
+    log('mini playeer');
     var size = MediaQuery.of(context).size;
     var height = size.height;
     var width = size.width;
@@ -33,7 +32,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
             currentFocus.unfocus();
           }
           Timer(const Duration(milliseconds: 150), () {
-            miniscreen();
+            // miniscreen();
+            Get.to(PlayScreen());
           });
         },
         child: Container(
@@ -41,18 +41,20 @@ class _MiniPlayerState extends State<MiniPlayer> {
           child: Container(
             height: height * 0.1,
             width: width,
-            decoration:  BoxDecoration(
+            decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                 
-                  colors: [
-                  const Color(0xFF521293).withOpacity(.8),
-                  Colors.black.withOpacity(.1),
-                ])),
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(0xFF521293).withOpacity(.8),
+                      Colors.black.withOpacity(.1),
+                    ])),
             child: audioPlayer.builderCurrent(
               builder: (context, playing) {
+                int id = int.parse(playing.audio.audio.metas.id!);
+                // ignore: unused_local_variable
+                Songs? data = boxsongfinder(id);
                 if (!playing.hasNext) {
                   audioPlayer.setLoopMode(LoopMode.single);
                 }
@@ -84,34 +86,23 @@ class _MiniPlayerState extends State<MiniPlayer> {
                           width: width * 0.6,
                           child: TextScroll(
                             audioPlayer.getCurrentAudioTitle,
-                             velocity: const Velocity(pixelsPerSecond: Offset(50, 0)),
+                            velocity:
+                                const Velocity(pixelsPerSecond: Offset(50, 0)),
                             style: GoogleFonts.lato(
                               color: bkclr,
                               fontSize: 17,
                             ),
                           ),
                         ),
-                        SizedBox(width: height*0.02),
+                        SizedBox(width: height * 0.02),
                         const PlayPause(),
                       ],
                     )
                   ],
                 );
-                
               },
-            
             ),
-            
           ),
-          
         ));
-  }
-
-  miniscreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PlayScreen(),
-      ),
-    );
   }
 }

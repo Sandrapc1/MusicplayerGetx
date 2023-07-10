@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter/src/widgets/framework.dart';
-// import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:music_player_1/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -42,12 +40,6 @@ class _TranceAddctionState extends State<TranceAddction> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                // Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF14052E),
-                // Color(0xFF643D80),
-                // Color.fromARGB(255, 64, 112, 135),
-                // Color(0xFF521293),
-                // Color(0xFF14052E),
                  Color(0xFF643D80),
                 Color.fromARGB(255, 64, 112, 135),
               ],

@@ -22,6 +22,8 @@ class MostlyPlayedSongs{
     required this.songurl,
     required this.count,
   });
+
+  void addPlayedSongsCount(MostlyPlayedSongs mostsong, songindex) {}
   
 }
 

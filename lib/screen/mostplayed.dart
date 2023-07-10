@@ -1,66 +1,35 @@
+
 // ignore_for_file: prefer_typing_uninitialized_variables
 
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:blurrycontainer/blurrycontainer.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:music_player_1/colors/colors.dart';
+import 'package:music_player_1/controller/mostplayed_controller.dart';
 import 'package:music_player_1/models/mostplayedmodel.dart';
 import 'package:music_player_1/screen/home.dart';
 import 'package:music_player_1/screen/miniplayer.dart';
 import 'package:music_player_1/screen/playscreen.dart';
-import 'package:music_player_1/widget/switch.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../widget/utilities.dart';
 
-bool _isPlaying=false;
-// import 'package:flutter/src/widgets/framework.dart';
-// import 'package:flutter/src/widgets/placeholder.dart';
+// ignore: unused_element
+bool _isPlaying = false;
+final MostplayedController mostcontroller = MostplayedController();
+// ignore: must_be_immutable
+class MostPlayed extends StatelessWidget {
+  MostPlayed({super.key});
 
-class MostPlayed extends StatefulWidget {
-  const MostPlayed({super.key});
-
-  @override
-  State<MostPlayed> createState() => _MostPlayedState();
-}
-
-class _MostPlayedState extends State<MostPlayed> {
-  final box = MostlyPlayedBox.getInstance();
-  List<Audio> mostconvertedaudio = [];
+  // final box = MostlyPlayedBox.getInstance();
   var size, height, width;
   bool favorites = false;
-
-  @override
-  void initState() {
-    List<MostlyPlayedSongs> mostsong = box.values.toList();
-    int count = 0;
-    mostsong.sort((a, b) => b.count!.compareTo(a.count!));
-    for (var element in mostsong) {
-      if (element.count! > 2) {
-        mostplayedsongs.insert(count, element);
-        count++;
-      }
-    }
-    for (var element in mostplayedsongs) {
-      mostconvertedaudio.add(Audio.file(
-      element.songurl!,
-      metas: Metas(
-        title: element.songname,
-        artist: element.artist,
-        id: element.id.toString(),
-      )
-      ));
-      
-    }
-
-    super.initState();
-  }
-  List<MostlyPlayedSongs>mostplayedsongs=[];
+  List<MostlyPlayedSongs> mostplayedsongs = [];
 
   @override
   Widget build(BuildContext context) {
+    final MostplayedController mostcontroller = Get.put(MostplayedController());
     size = MediaQuery.of(context).size;
     height = size.height;
     width = size.width;
@@ -71,7 +40,8 @@ class _MostPlayedState extends State<MostPlayed> {
         appBar: AppBar(
           leading: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Get.back();
+                // Navigator.pop(context);
               },
               icon: const Icon(
                 Icons.arrow_back,
@@ -153,14 +123,16 @@ class _MostPlayedState extends State<MostPlayed> {
                       child: FloatingActionButton(
                         backgroundColor: backcolor,
                         onPressed: () {
-                          audioPlayer.open(Playlist(audios: mostconvertedaudio,startIndex: 0),
-                          showNotification: true,
+                          audioPlayer.open(
+                            Playlist(
+                              audios: mostcontroller.mostconvertedaudio,
+                              startIndex: 0,
+                            ),
+                            showNotification: true,
                           );
-                        audioPlayer.play();
-                        setState(() {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => PlayScreen(),));
-                          _isPlaying=!_isPlaying;
-                        });
+
+                          audioPlayer.play();
+                          Get.to(PlayScreen());
                         },
                         child: Icon(
                           Icons.play_arrow_rounded,
@@ -171,48 +143,57 @@ class _MostPlayedState extends State<MostPlayed> {
                     ),
                   ],
                 ),
-                
-                  // height: height /1.6,
-                   ValueListenableBuilder(
-                    valueListenable: box.listenable(),
-                    builder: (context, value, child) {
-                      return mostplayedsongs.isNotEmpty
-                      ?ListView.separated(
-                        padding:EdgeInsets.only(bottom: width * .3),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) => songList(mostplayedsongs[index].id,
-                        index,
-                        mostplayedsongs[index].songname,
-                        mostplayedsongs[index].artist),
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 10),
-                        itemCount: mostplayedsongs.length<10?mostplayedsongs.length:10,
-                        ):SizedBox(
-                          height: height*0.3,
-                          child: const Center(child: Text('No songs found',style: TextStyle(color: bkclr),)),
-                        );
-                    },
-                  ),
-                
+
+                Obx(() =>
+                    mostcontroller.mostplayedgetx.isNotEmpty
+                        ? ListView.separated(
+                            padding: EdgeInsets.only(bottom: width * .3),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) =>
+                             MostlySongTile(mostcontroller: mostcontroller, index: index),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                            itemCount: mostcontroller.mostsong.length < 10
+                                ? mostcontroller.mostsong.length
+                                : 10,
+                          )
+                        : SizedBox(
+                            height: height * 0.3,
+                            child: const Center(
+                                child: Text(
+                              'No songs found',
+                              style: TextStyle(color: bkclr),
+                            )),
+                          )),
               ],
             ),
           ),
         ),
-        bottomSheet: Container(
-          color: bgcolor,
-          child: const MiniPlayer()),
+        bottomSheet: Container(color: bgcolor, child: const MiniPlayer()),
       ),
     );
   }
+}
 
-  Widget songList(id,index,title,artist) {
+class MostlySongTile extends StatelessWidget {
+  final MostplayedController mostcontroller;
+  final int index;
+  const MostlySongTile({
+    super.key,
+    required this.mostcontroller,
+    required this.index,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
     return Padding(
       padding: EdgeInsets.only(left: height * 0.01, right: height * 0.01),
       child: InkWell(
         onTap: () {
           audioPlayer.open(Playlist(
-            audios: mostconvertedaudio,
+            audios: mostcontroller.mostconvertedaudio,
             startIndex: index,
           ));
         },
@@ -227,14 +208,16 @@ class _MostPlayedState extends State<MostPlayed> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-               Padding(
-                padding: const EdgeInsets.all(5),
-                child: QueryArtworkWidget(
-                  id:mostplayedsongs[index].id!,
-                   type: ArtworkType.AUDIO,
-                   nullArtworkWidget: const CircleAvatar(backgroundImage:AssetImage('assets/images/null.jpg'),
-                    radius: 24,),)
-              ),
+              Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: QueryArtworkWidget(
+                    id: mostcontroller.mostsong[index].id!,
+                    type: ArtworkType.AUDIO,
+                    nullArtworkWidget: const CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/null.jpg'),
+                      radius: 24,
+                    ),
+                  )),
               SizedBox(
                 width: height * 0.01,
               ),
@@ -243,17 +226,17 @@ class _MostPlayedState extends State<MostPlayed> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                    overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.lato(
-                        color: Colors.white,
-                        fontSize: 15,
-                      )),
+                    Text(mostcontroller.mostsong[index].songname,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.lato(
+                          color: Colors.white,
+                          fontSize: 15,
+                        )),
                     const SizedBox(
                       height: 5,
                     ),
                     Text(
-                      artist,
+                      mostcontroller.mostsong[index].artist,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.lato(
                         color: Colors.white,
@@ -263,27 +246,20 @@ class _MostPlayedState extends State<MostPlayed> {
                   ],
                 ),
               ),
-              SizedBox(width: height * 0.02),
-             SwitchCase(id: id),
               PopupMenuButton(
                 color: bkclr,
-                onSelected: (value) {
-                 playlistBottomSheet(index, context, createcontroller);
-                },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 1,
-                    child: Text('Add Playlist'),
+                    child: Text('ADD Playlist'),
                   ),
                 ],
               ),
               SizedBox(width: height * 0.03),
             ],
           ),
-          
         ),
       ),
-      
     );
   }
 }
